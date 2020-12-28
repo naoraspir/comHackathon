@@ -22,7 +22,7 @@ class Server:
         
 
     def send_broadcast_messages(self):
-        message_to_send = struct.pack('Ibh', 0xfeedbeef, 0x2, 0x820)
+        message_to_send = struct.pack('Ibh', 0xfeedbeef, 0x2, SERVER_PORT)
         send_until = time.time() + 10
         while time.time() < send_until:
             self.udp_socket.sendto(message_to_send, ('<broadcast>', 13117))
