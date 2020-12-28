@@ -59,9 +59,11 @@ class Client:
 
     def keyboard_recorder(self):
         print("trying to record")
+        counter=0
+        keyboard.on_press(self.send_to_server)
         while self.in_play:
-            keyboard.on_press(self.send_to_server)
-            time.sleep(0.1)
+            continue
+        print(counter)
 
     def send_to_server(self, event):
         try:
@@ -75,7 +77,6 @@ class Client:
             print(msg)  # game started
             self.in_play = True
             record_trd.start()
-            print("started recording")
             msg = self.tcp_socket.recv(2048).decode()
             self.in_play = False
             record_trd.join()

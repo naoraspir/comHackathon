@@ -77,7 +77,7 @@ class Server:
         # finish!!
         g1_total = sum(self.group1.values())
         g2_total = sum(self.group2.values())
-        msg = "Game over!\n"
+        msg = "\nGame over!\n"
         msg += "Group 1 typed in " + str(g1_total) + " characters. Group 2 typed in " + str(g2_total) + " characters.\n"
         if g1_total >= g2_total:
             msg += self.str_winner(1, self.group1)
@@ -95,13 +95,10 @@ class Server:
         return msg
 
     def game_play_trd(self, connection_dict: dict, group_name):
-        msg = """Welcome to Keyboard Spamming Battle Royale.
-               Group 1:
-               ==\n"""
+        msg = """Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n"""
         for name in self.group1:
             msg += name
-        msg += """Group 2:
-                ==\n"""
+        msg += """Group 2:\n==\n"""
         for name in self.group2:
             msg += name
         msg += "\nStart pressing keys on your keyboard as fast as you can!!"
@@ -112,6 +109,7 @@ class Server:
             x = connection_dict['client_socket'].recv(2048).decode()
             print(x)
             counter += 1
+            # time.sleep(0)
         print('finished BBC')
         if group_name in self.group1:
             self.group1[group_name] += counter
