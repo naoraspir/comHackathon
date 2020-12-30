@@ -35,24 +35,37 @@ class Client:
         self.tcp_socket.connect((server_adress, server_port))
 
     def send_name(self):
+        """
+            meathod used for sending team name to connected server server.
+        """
         msg = self.team_name + '\n'
         self.tcp_socket.send(msg.encode())
 
     def look_for_server(self):
-
+        """
+            meathod used for looking for servers to play with.
+        """
         self.udp_socket.bind(('', localPORTUDP))
         # connecting and sending name.
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
+                
+                #recieve and unpack msg from server over udp.
                 data_tuple = struct.unpack('Ibh', buffer_m)
                 M_Cookie = data_tuple[0]
                 M_type = data_tuple[1]
                 server_port = data_tuple[2]
+                
+                #check if the msg is with the cookie and type agreed by client and server.
                 if M_Cookie != 0xfeedbeef or M_type != 0x2:
                     continue
+                
+                #connect to server.
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
+                
+                #send team name.
                 try:
                     self.send_name()
                 except:
@@ -60,20 +73,31 @@ class Client:
                     self.tcp_socket.close()
                     continue
                 break
+
             except:
                 traceback.print_exc()
                 print("there was an excpetion, finding another server")
                 continue
+
+        #done with udp connection, close.   
         self.udp_socket.close()
 
     def keyboard_recorder(self):
-        print("trying to record")
-        # keyboard.on_press(self.send_to_server)
+        """
+            thread meathod used for recording and sending pressed keys from client to server while in game.  
+        """
+
+        # set the system settings for reading chars without blocking.
         os.system("stty raw -echo")
+
+        #while in game read pressed key and send to server over tcp socket.
         while self.in_play:
+            #set time out for last loop, withour this the loop will have to recieve an extra key press to end.
             data,a,b = select([sys.stdin],[],[],0)
             if data:
+                #read press.
                 character = sys.stdin.read(1)
+                #send press to server
                 self.send_to_server(character)
         os.system("stty -raw echo")
 
