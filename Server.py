@@ -193,10 +193,16 @@ class Server:
             self.group2[group_name] += counter
 
     def client_sockets_close(self):
+        """
+            method for closing all clients sockets after use.
+        """
         for group in self.connections:
             self.connections[group]["client_socket"].close()
 
     def crash(self):
+        """
+            method in case of crash to close used sockets.
+        """
         self.client_sockets_close()
         self.tcp_socket.close()
         self.udp_socket.close()
