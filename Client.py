@@ -11,7 +11,7 @@ from select import select
 import sys
 import os
 
-CLIENT_IP = get_if_addr('eth1')
+CLIENT_IP = get_if_addr('eth2')
 localPORTUDP = 13117
 localPORTTCP = 2080 
 buffer_size = 1024
@@ -45,23 +45,32 @@ class Client:
         """
             meathod used for looking for servers to play with.
         """
-        self.udp_socket.bind((CLIENT_IP, localPORTUDP))
+        self.udp_socket.bind(('172.99.255.255', localPORTUDP))
         # connecting and sending name.
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                #print(buffer_m.decode())
+                print(buffer_m)
                 print(server_address)
-                #recieve and unpack msg from server over udp.
-                data_tuple = struct.unpack('Ibh', buffer_m)
+                try:
+                    #recieve and unpack msg from server over udp.
+                    data_tuple = struct.unpack('Ibh', buffer_m)
+                    # data_tuple = buffer_m.decode()
+                    print(data_tuple)
+                except:
+                    # traceback.print_exc()
+                    time.sleep(5)
+                    # data_tuple =  buffer_m.decode('utf8')
+                    # print(data_tuple)
+                    continue
                 M_Cookie = data_tuple[0]
                 M_type = data_tuple[1]
                 server_port = data_tuple[2]
                 
                 #check if the msg is with the cookie and type agreed by client and server.
-                if M_Cookie != 0xfeedbeef or M_type != 0x2:
+            
+                if M_Cookie != 0xfeedbeef and M_type != 0x2:
                     continue
-                
                 #connect to server.
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
                 self.connect_to_server(server_address[0], server_port)
@@ -75,9 +84,9 @@ class Client:
                 break
 
             except:
-                traceback.print_exc()
+                # traceback.print_exc()
                 print("the server packed the msg diffrently then us.")
-                time.sleep(0.01)
+                time.sleep(5)
                 continue
 
         #done with udp connection, close.   
@@ -100,6 +109,7 @@ class Client:
                 character = sys.stdin.read(1)
                 #send press to server
                 self.send_to_server(character)
+            time.sleep(0.04)
         
         #return system setting to normal
         os.system("stty -raw echo")

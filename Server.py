@@ -8,7 +8,7 @@ from scapy.all import *
 from select import select
 
 SERVER_PORT = 2080
-SERVER_IP =get_if_addr('eth1')
+SERVER_IP =get_if_addr('eth2')
 
 
 class Server:
@@ -34,7 +34,7 @@ class Server:
         #starting a while loop that will run for 10 seconds.
         while time.time() <= send_until:
             #send the udp packet on broadcast.
-            udp_socket.sendto(message_to_send, ('<broadcast>', 13117))
+            udp_socket.sendto(message_to_send, ('172.99.255.255', 13117))
             time.sleep(1)
 
     def accept_conn(self, broadcast_thread, tcp_socket):
@@ -59,7 +59,7 @@ class Server:
             meathod used for the whole clients offering and connecting stage.
             the broadcast msg will be sent every second for 10 seconds, accpting clients for game session.
         """
-        self.udp_socket.bind((SERVER_IP, SERVER_PORT))
+        self.udp_socket.bind(('172.99.255.255', SERVER_PORT))
         self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.tcp_socket.bind((SERVER_IP, SERVER_PORT))
 
@@ -187,6 +187,7 @@ class Server:
             if incoming_character:
                 x = connection_dict['client_socket'].recv(2048).decode()
                 counter += 1
+                time.sleep(1)
         
         #add the accumulated key presses to the team counters dictionary.
         if group_name in self.group1:
@@ -219,10 +220,14 @@ while 1:
     except Exception:
         traceback.print_exc()
         server.crash()
+        time.sleep(0.3)
         continue
+        
     try:
         server.game_play()
     except Exception:
         traceback.print_exc()
         server.client_sockets_close()
+        time.sleep(0.3)
         continue
+    time.sleep(0.3)
