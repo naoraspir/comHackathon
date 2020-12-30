@@ -4,13 +4,13 @@ import traceback
 from struct import *
 from socket import *
 import enum
-from msvcrt import getch
+import getch
 from threading import Thread
 import keyboard
 
 CLIENT_IP = gethostbyname(gethostname())
 localPORTUDP = 13117
-localPORTTCP = 2081  # todo switch back to 2080
+localPORTTCP = 2080  # todo switch back to 2080
 buffer_size = 1024
 
 
@@ -22,7 +22,7 @@ class Client:
         self.in_play = False
 
     def connect_to_server(self, server_adress, server_port):
-        self.tcp_socket.bind(('',localPORTTCP))
+        # self.tcp_socket.bind(('0.0.0.0',localPORTTCP))
         self.tcp_socket.connect((server_adress, server_port))
 
     def send_name(self):
@@ -31,7 +31,7 @@ class Client:
 
     def look_for_server(self):
 
-        self.udp_socket.bind((CLIENT_IP, localPORTUDP))
+        self.udp_socket.bind(('', localPORTUDP))
         # connecting and sending name.
         while True:
             try:
