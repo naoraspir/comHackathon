@@ -64,7 +64,7 @@ class Client:
                 
                 #connect to server.
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
-                self.connect_to_server(CLIENT_IP, server_port)
+                self.connect_to_server(server_address[0], server_port)
                 
                 #send team name.
                 try:
@@ -77,6 +77,7 @@ class Client:
             except:
                 traceback.print_exc()
                 print("the server packed the msg diffrently then us.")
+                time.sleep(0.01)
                 continue
 
         #done with udp connection, close.   
@@ -167,3 +168,4 @@ while 1:
     client = Client()
     client.look_for_server()
     client.game_play()
+    time.sleep(0.05)
