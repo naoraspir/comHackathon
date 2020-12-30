@@ -12,8 +12,8 @@ import sys
 import os
 
 CLIENT_IP = get_if_addr('eth1')
-localPORTUDP = 13114
-localPORTTCP = 2082 
+localPORTUDP = 13117
+localPORTTCP = 2080 
 buffer_size = 1024
 
 
@@ -50,7 +50,7 @@ class Client:
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                print(buffer_m.decode())
+                #print(buffer_m.decode())
                 print(server_address)
                 #recieve and unpack msg from server over udp.
                 data_tuple = struct.unpack('Ibh', buffer_m)
@@ -64,7 +64,7 @@ class Client:
                 
                 #connect to server.
                 print(f'Received offer from {server_address[0]}, attempting to connect...')
-                self.connect_to_server(server_address[0], server_port)
+                self.connect_to_server(CLIENT_IP, server_port)
                 
                 #send team name.
                 try:
@@ -75,6 +75,7 @@ class Client:
                 break
 
             except:
+                traceback.print_exc()
                 print("the server packed the msg diffrently then us.")
                 continue
 

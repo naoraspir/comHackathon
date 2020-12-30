@@ -8,7 +8,7 @@ from scapy.all import *
 from select import select
 
 SERVER_PORT = 2080
-SERVER_IP = get_if_addr('eth1')
+SERVER_IP =get_if_addr('eth1')
 
 
 class Server:
@@ -34,7 +34,7 @@ class Server:
         #starting a while loop that will run for 10 seconds.
         while time.time() <= send_until:
             #send the udp packet on broadcast.
-            udp_socket.sendto(message_to_send, ('<broadcast>', 13114))
+            udp_socket.sendto(message_to_send, ('<broadcast>', 13117))
             time.sleep(1)
 
     def accept_conn(self, broadcast_thread, tcp_socket):
@@ -212,8 +212,9 @@ class Server:
 
 print(f'Server started, listening on IP address {SERVER_IP}')
 while 1:
-    server = Server()
+    
     try:
+        server = Server()
         server.waiting_for_clients()
     except Exception:
         traceback.print_exc()
