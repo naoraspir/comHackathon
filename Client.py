@@ -45,7 +45,7 @@ class Client:
         """
             meathod used for looking for servers to play with.
         """
-        self.udp_socket.bind(('', localPORTUDP))
+        self.udp_socket.bind((CLIENT_IP, localPORTUDP))
         # connecting and sending name.
         while True:
             try:

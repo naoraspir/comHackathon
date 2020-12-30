@@ -59,7 +59,7 @@ class Server:
             meathod used for the whole clients offering and connecting stage.
             the broadcast msg will be sent every second for 10 seconds, accpting clients for game session.
         """
-        self.udp_socket.bind(('', SERVER_PORT))
+        self.udp_socket.bind((SERVER_IP, SERVER_PORT))
         self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.tcp_socket.bind((SERVER_IP, SERVER_PORT))
 
