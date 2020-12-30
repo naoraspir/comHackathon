@@ -1,20 +1,21 @@
 import enum
 import time
 import traceback
-from socket import *
+import socket
 from threading import *
 import struct
+from scapy.all import *
 from select import select
 
 SERVER_PORT = 2080
-SERVER_IP = gethostbyname(gethostname())
+SERVER_IP = get_if_addr('eth1')
 
 
 class Server:
     def __init__(self):
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM)
-        self.tcp_socket = socket(AF_INET, SOCK_STREAM)
-        self.tcp_socket.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tcp_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         self.connections = {}
         self.game_treads = {}
         self.group1 = {}
@@ -33,7 +34,7 @@ class Server:
         #starting a while loop that will run for 10 seconds.
         while time.time() <= send_until:
             #send the udp packet on broadcast.
-            udp_socket.sendto(message_to_send, ('<broadcast>', 13117))
+            udp_socket.sendto(message_to_send, ('<broadcast>', 13114))
             time.sleep(1)
 
     def accept_conn(self, broadcast_thread, tcp_socket):
@@ -48,8 +49,9 @@ class Server:
             try:
                 client_socket, address = tcp_socket.accept()
                 group_name = client_socket.recv(2048).decode()
+                print(f'team {group_name} has connected succsesfuly')
                 self.connections[group_name] = {"client_socket": client_socket, "address": address}
-            except timeout:
+            except :
                 continue
 
     def waiting_for_clients(self):
@@ -57,8 +59,8 @@ class Server:
             meathod used for the whole clients offering and connecting stage.
             the broadcast msg will be sent every second for 10 seconds, accpting clients for game session.
         """
-        self.udp_socket.bind((SERVER_IP, SERVER_PORT))
-        self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        self.udp_socket.bind(('', SERVER_PORT))
+        self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.tcp_socket.bind((SERVER_IP, SERVER_PORT))
 
         #we allow up to 40 participants in a game session.
@@ -130,7 +132,7 @@ class Server:
         msg += "Group 1 typed in " + str(g1_total) + " characters. Group 2 typed in " + str(g2_total) + " characters.\n"
         if g1_total > g2_total:
             msg += self.str_winner(1, self.group1)
-        if g1_total > g2_total:
+        if g1_total < g2_total:
             msg += self.str_winner(2, self.group2)
         else:
             msg+= "Oh Snap! Its A DRAW!!!!\n "

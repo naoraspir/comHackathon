@@ -2,8 +2,8 @@ import struct
 import time
 import traceback
 from struct import *
-from socket import *
-import enum
+import socket
+from scapy.all import *
 import getch
 from threading import Thread
 import keyboard
@@ -11,18 +11,18 @@ from select import select
 import sys
 import os
 
-CLIENT_IP = gethostbyname(gethostname())
-localPORTUDP = 13117
-localPORTTCP = 2080  
+CLIENT_IP = get_if_addr('eth1')
+localPORTUDP = 13114
+localPORTTCP = 2082 
 buffer_size = 1024
 
 
 class Client:
     def __init__(self):
         self.team_name = "Spam Tov Heavy"
-        self.udp_socket = socket(AF_INET, SOCK_DGRAM)
-        self.tcp_socket = socket(AF_INET, SOCK_STREAM)
-        self.tcp_socket.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tcp_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         self.in_play = False
 
     def connect_to_server(self, server_adress, server_port):
@@ -50,7 +50,8 @@ class Client:
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                
+                print(buffer_m.decode())
+                print(server_address)
                 #recieve and unpack msg from server over udp.
                 data_tuple = struct.unpack('Ibh', buffer_m)
                 M_Cookie = data_tuple[0]
@@ -69,14 +70,12 @@ class Client:
                 try:
                     self.send_name()
                 except:
-                    traceback.print_exc()
                     self.tcp_socket.close()
                     continue
                 break
 
             except:
-                traceback.print_exc()
-                print("there was an excpetion, finding another server")
+                print("the server packed the msg diffrently then us.")
                 continue
 
         #done with udp connection, close.   
@@ -124,6 +123,16 @@ class Client:
             
             #recieving the first start game message
             msg = self.tcp_socket.recv(2048).decode()
+
+            # for style in range(8):
+            #         for fg in range(30,38):
+            #             s1 = ''
+            #             for bg in range(40,48):
+            #                 format = ';'.join([str(style), str(fg), str(bg)])
+            #                 s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
+            #             print(s1)
+            #         print('\n')
+
             print(msg)
             #set client state to in game state.
             self.in_play = True
