@@ -99,33 +99,56 @@ class Client:
                 character = sys.stdin.read(1)
                 #send press to server
                 self.send_to_server(character)
+        
+        #return system setting to normal
         os.system("stty -raw echo")
 
     def send_to_server(self, event):
+        """
+            meathod used for sending pressed key to connected server.
+            params: 
+                event - the key pressed by client to send.
+        """
         try:
             self.tcp_socket.send(event.encode())
         except:
             return
+   
     def game_play(self):
+        """
+            meathod used for game play logic.
+        """
         try:
+            #open key press thread
             record_trd = Thread(target=self.keyboard_recorder)
+            
+            #recieving the first start game message
             msg = self.tcp_socket.recv(2048).decode()
-            print(msg)  # game started
+            print(msg)
+            #set client state to in game state.
             self.in_play = True
             record_trd.start()
+
+            #recieving the first start game message
             msg = self.tcp_socket.recv(2048).decode()
             self.in_play = False
             record_trd.join()
-            print(msg)  # game ended
+
+            # game ended    
+            print(msg)  
             print("Server disconnected, listening for offer requests...")
             self.tcp_socket.close()
         except:
-            # traceback.print_exc()
+            traceback.print_exc()
             self.crash()
             return
+        #close all ports
         self.crash()
 
     def crash(self):
+        """
+            in case needed, close open 
+        """
         self.tcp_socket.close()
 
 
