@@ -4,6 +4,7 @@ import traceback
 from socket import *
 from threading import *
 import struct
+from select import select
 
 SERVER_PORT = 2080
 SERVER_IP = gethostbyname(gethostname())
@@ -13,6 +14,7 @@ class Server:
     def __init__(self):
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
+        self.tcp_socket.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
         self.connections = {}
         self.game_treads = {}
         self.group1 = {}
@@ -40,9 +42,9 @@ class Server:
             This function sends UDP broadcast messages each 1 sec
             for 10 seconds and listening for clients responses.
         """
-        self.udp_socket.bind(('', SERVER_PORT))
+        self.udp_socket.bind((SERVER_IP, SERVER_PORT))
         self.udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-        self.tcp_socket.bind(('', SERVER_PORT))
+        self.tcp_socket.bind((SERVER_IP, SERVER_PORT))
         self.tcp_socket.listen(20)
         self.tcp_socket.settimeout(2)
         broadcast_thread = Thread(target=self.send_broadcast_messages, args=(self.udp_socket,))
@@ -106,9 +108,11 @@ class Server:
         counter = 0
         play_until = time.time() + 10
         while time.time() <= play_until:
-            x = connection_dict['client_socket'].recv(2048).decode()
-            print(x)
-            counter += 1
+            incoming_character, a, b = select([connection_dict['client_socket']],[],[],0)
+            if incoming_character:
+                x = connection_dict['client_socket'].recv(2048).decode()
+                print(x)
+                counter += 1
             # time.sleep(0)
         print('finished BBC')
         if group_name in self.group1:

@@ -7,10 +7,13 @@ import enum
 import getch
 from threading import Thread
 import keyboard
+from select import select
+import sys
+import os
 
 CLIENT_IP = gethostbyname(gethostname())
 localPORTUDP = 13117
-localPORTTCP = 2080  # todo switch back to 2080
+localPORTTCP = 2080  
 buffer_size = 1024
 
 
@@ -19,10 +22,16 @@ class Client:
         self.team_name = "Spam Tov Heavy"
         self.udp_socket = socket(AF_INET, SOCK_DGRAM)
         self.tcp_socket = socket(AF_INET, SOCK_STREAM)
+        self.tcp_socket.setsockopt(SOL_SOCKET,SO_REUSEADDR,1)
         self.in_play = False
 
     def connect_to_server(self, server_adress, server_port):
-        # self.tcp_socket.bind(('0.0.0.0',localPORTTCP))
+        """
+            meathod used for connecting to specified server.
+            params: 
+                server_adress 
+                server_port
+        """
         self.tcp_socket.connect((server_adress, server_port))
 
     def send_name(self):
@@ -59,15 +68,18 @@ class Client:
 
     def keyboard_recorder(self):
         print("trying to record")
-        counter=0
-        keyboard.on_press(self.send_to_server)
+        # keyboard.on_press(self.send_to_server)
+        os.system("stty raw -echo")
         while self.in_play:
-            continue
-        print(counter)
+            data,a,b = select([sys.stdin],[],[],0)
+            if data:
+                character = sys.stdin.read(1)
+                self.send_to_server(character)
+        os.system("stty -raw echo")
 
     def send_to_server(self, event):
         try:
-            self.tcp_socket.send(event.name.encode())
+            self.tcp_socket.send(event.encode())
         except:
             return
     def game_play(self):
@@ -83,11 +95,11 @@ class Client:
             print(msg)  # game ended
             print("Server disconnected, listening for offer requests...")
             self.tcp_socket.close()
-            return
         except:
             # traceback.print_exc()
             self.crash()
             return
+        self.crash()
 
     def crash(self):
         self.tcp_socket.close()
