@@ -52,12 +52,12 @@ class Client:
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                print("Packet recived: "buffer_m)
-                print("address recieved : "server_address)
+                print("Packet recived: "+str(buffer_m))
+                print("address recieved : "+str(server_address))
                 try:
                     #recieve and unpack msg from server over udp.
                     data_tuple = struct.unpack('Ibh', buffer_m)
-                    print("data translated: "data_tuple)
+                    print("data translated: "+str(data_tuple))
                 except:
                     time.sleep(1)
                     continue
@@ -143,6 +143,7 @@ class Client:
 
             # game ended    
             print(msg)  
+            
             print("Server disconnected, listening for offer requests...")
             self.tcp_socket.close()
         except:
