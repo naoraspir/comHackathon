@@ -4,7 +4,7 @@ import traceback
 from struct import *
 import socket
 from scapy.all import *
-import getch
+#import getch
 from threading import Thread
 import keyboard
 from select import select
@@ -12,7 +12,7 @@ import sys
 import os
 
 CLIENT_IP = get_if_addr('eth1')
-localPORTUDP = 13120
+localPORTUDP = 13117
 localPORTTCP = 2080 
 buffer_size = 1024
 BROAD_NET = '172.1.255.255'
@@ -52,12 +52,13 @@ class Client:
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                print("Packet recived: "+str(buffer_m))
-                print("address recieved : "+str(server_address))
+                print('\x1b[6;30;42m' + 'Packet recived: '+ str(buffer_m) + '\x1b[0m')
+
+                print('\x1b[6;30;42m' + 'address recieved : '+str(server_address) + '\x1b[0m')
                 try:
                     #recieve and unpack msg from server over udp.
                     data_tuple = struct.unpack('Ibh', buffer_m)
-                    print("data translated: "+str(data_tuple))
+                    print('\x1b[6;30;45m' + 'data translated: '+str(data_tuple) + '\x1b[0m')
                 except:
                     time.sleep(1)
                     continue
@@ -70,7 +71,8 @@ class Client:
                 if M_Cookie != 0xfeedbeef and M_type != 0x2:
                     continue
                 #connect to server.
-                print(f'Received offer from {server_address[0]}, attempting to connect...')
+                print('\x1b[6;30;43m' + f'Received offer from {server_address[0]}, attempting to connect...' + '\x1b[0m')
+
                 self.connect_to_server(server_address[0], server_port)
                 
                 #send team name.
@@ -144,7 +146,8 @@ class Client:
             # game ended    
             print(msg)  
             
-            print("Server disconnected, listening for offer requests...")
+            print('\x1b[6;30;42m' + 'Server disconnected, listening for offer requests...' + '\x1b[0m')
+
             self.tcp_socket.close()
         except:
             self.crash()
@@ -159,7 +162,8 @@ class Client:
         self.tcp_socket.close()
 
 
-print("Client started, listening for offer requests...")
+print('\x1b[6;30;44m' + 'Client started, listening for offer requests...' + '\x1b[0m')
+
 while 1:
     client = Client()
     client.look_for_server()

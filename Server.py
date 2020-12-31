@@ -10,6 +10,7 @@ from select import select
 SERVER_PORT = 2080
 SERVER_IP =get_if_addr('eth1')
 BROAD_NET = '172.1.255.255'
+UDP_PORT=13117
 
 
 class Server:
@@ -35,7 +36,7 @@ class Server:
         #starting a while loop that will run for 10 seconds.
         while time.time() <= send_until:
             #send the udp packet on broadcast.
-            udp_socket.sendto(message_to_send, (BROAD_NET, 13120))
+            udp_socket.sendto(message_to_send, (BROAD_NET, UDP_PORT))
             time.sleep(1)
 
     def accept_conn(self, broadcast_thread, tcp_socket): 
@@ -50,7 +51,8 @@ class Server:
             try:
                 client_socket, address = tcp_socket.accept()
                 group_name = client_socket.recv(2048).decode()
-                print(f'team {group_name} has connected succsesfuly')
+                print('\x1b[6;30;46m' + f'team {group_name} has connected succsesfuly' + '\x1b[0m')
+
                 self.connections[group_name] = {"client_socket": client_socket, "address": address}
             except :
                 continue
@@ -89,7 +91,8 @@ class Server:
 
         #check that there is at least one player for a game session to start.
         if len(self.connections) < 1:
-            print("not enough players to play restarting server")
+            print('\x1b[6;30;41m' + 'not enough players to play restarting server' + '\x1b[0m')
+
             self.client_sockets_close()
             return
 
@@ -112,7 +115,8 @@ class Server:
         
         #wait for all game sessions to end.
         for trd in self.game_treads:
-            print("waiting for trd of "+trd)
+            print('\x1b[6;30;42m' + 'waiting for trd of' + trd + '\x1b[0m')
+
             self.game_treads[trd].join()
         
         # finish stage:
@@ -143,7 +147,8 @@ class Server:
             self.connections[group]['client_socket'].send(msg.encode())
             self.connections[group]['client_socket'].close()
         #by by!
-        print("Game over, sending out offer requests...")
+        print('\x1b[6;30;41m' + 'Game over, sending out offer requests...' + '\x1b[0m')
+
 
     def str_winner(self, g_num, group):
         """
@@ -212,7 +217,8 @@ class Server:
         self.udp_socket.close()
 
 
-print(f'Server started, listening on IP address {SERVER_IP}')
+print('\x1b[6;30;45m' + f'Server started, listening on IP address {SERVER_IP}' + '\x1b[0m')
+
 while 1:
     
     try:
