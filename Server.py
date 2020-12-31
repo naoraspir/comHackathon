@@ -8,7 +8,8 @@ from scapy.all import *
 from select import select
 
 SERVER_PORT = 2080
-SERVER_IP =get_if_addr('eth2')
+SERVER_IP =get_if_addr('eth1')
+BROAD_NET = '172.1.255.255'
 
 
 class Server:
@@ -34,10 +35,10 @@ class Server:
         #starting a while loop that will run for 10 seconds.
         while time.time() <= send_until:
             #send the udp packet on broadcast.
-            udp_socket.sendto(message_to_send, ('172.99.255.255', 13117))
+            udp_socket.sendto(message_to_send, (BROAD_NET, 13120))
             time.sleep(1)
 
-    def accept_conn(self, broadcast_thread, tcp_socket):
+    def accept_conn(self, broadcast_thread, tcp_socket): 
         """
             thread used for accepting clients connections that are sent and their team name. works simultanious with the udp broadcast.
             params: 
@@ -59,7 +60,7 @@ class Server:
             meathod used for the whole clients offering and connecting stage.
             the broadcast msg will be sent every second for 10 seconds, accpting clients for game session.
         """
-        self.udp_socket.bind(('172.99.255.255', SERVER_PORT))
+        self.udp_socket.bind((BROAD_NET, SERVER_PORT))
         self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.tcp_socket.bind((SERVER_IP, SERVER_PORT))
 
@@ -132,7 +133,7 @@ class Server:
         msg += "Group 1 typed in " + str(g1_total) + " characters. Group 2 typed in " + str(g2_total) + " characters.\n"
         if g1_total > g2_total:
             msg += self.str_winner(1, self.group1)
-        if g1_total < g2_total:
+        elif g1_total < g2_total:
             msg += self.str_winner(2, self.group2)
         else:
             msg+= "Oh Snap! Its A DRAW!!!!\n "

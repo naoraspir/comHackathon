@@ -11,10 +11,12 @@ from select import select
 import sys
 import os
 
-CLIENT_IP = get_if_addr('eth2')
-localPORTUDP = 13117
+CLIENT_IP = get_if_addr('eth1')
+localPORTUDP = 13120
 localPORTTCP = 2080 
 buffer_size = 1024
+BROAD_NET = '172.1.255.255'
+
 
 
 class Client:
@@ -45,23 +47,19 @@ class Client:
         """
             meathod used for looking for servers to play with.
         """
-        self.udp_socket.bind(('172.99.255.255', localPORTUDP))
+        self.udp_socket.bind((BROAD_NET, localPORTUDP))
         # connecting and sending name.
         while True:
             try:
                 buffer_m, server_address = self.udp_socket.recvfrom(buffer_size)
-                print(buffer_m)
-                print(server_address)
+                print("Packet recived: "buffer_m)
+                print("address recieved : "server_address)
                 try:
                     #recieve and unpack msg from server over udp.
                     data_tuple = struct.unpack('Ibh', buffer_m)
-                    # data_tuple = buffer_m.decode()
-                    print(data_tuple)
+                    print("data translated: "data_tuple)
                 except:
-                    # traceback.print_exc()
-                    time.sleep(5)
-                    # data_tuple =  buffer_m.decode('utf8')
-                    # print(data_tuple)
+                    time.sleep(1)
                     continue
                 M_Cookie = data_tuple[0]
                 M_type = data_tuple[1]
@@ -84,9 +82,7 @@ class Client:
                 break
 
             except:
-                # traceback.print_exc()
-                print("the server packed the msg diffrently then us.")
-                time.sleep(5)
+                time.sleep(3)
                 continue
 
         #done with udp connection, close.   
@@ -103,14 +99,13 @@ class Client:
         #while in game read pressed key and send to server over tcp socket.
         while self.in_play:
             #set time out for last loop, withour this the loop will have to recieve an extra key press to end.
-            data,a,b = select([sys.stdin],[],[],0)
+            data, a, b = select([sys.stdin],[],[],0)
             if data:
                 #read press.
                 character = sys.stdin.read(1)
                 #send press to server
                 self.send_to_server(character)
-            time.sleep(0.04)
-        
+            
         #return system setting to normal
         os.system("stty -raw echo")
 
@@ -136,21 +131,12 @@ class Client:
             #recieving the first start game message
             msg = self.tcp_socket.recv(2048).decode()
 
-            # for style in range(8):
-            #         for fg in range(30,38):
-            #             s1 = ''
-            #             for bg in range(40,48):
-            #                 format = ';'.join([str(style), str(fg), str(bg)])
-            #                 s1 += '\x1b[%sm %s \x1b[0m' % (format, format)
-            #             print(s1)
-            #         print('\n')
-
             print(msg)
             #set client state to in game state.
             self.in_play = True
             record_trd.start()
 
-            #recieving the first start game message
+            #recieving the Game Over message
             msg = self.tcp_socket.recv(2048).decode()
             self.in_play = False
             record_trd.join()
@@ -160,7 +146,6 @@ class Client:
             print("Server disconnected, listening for offer requests...")
             self.tcp_socket.close()
         except:
-            traceback.print_exc()
             self.crash()
             return
         #close all ports
@@ -168,7 +153,7 @@ class Client:
 
     def crash(self):
         """
-            in case needed, close open 
+            in case needed, close all open sockets. 
         """
         self.tcp_socket.close()
 
